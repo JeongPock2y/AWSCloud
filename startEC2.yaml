@@ -1,0 +1,48 @@
+Parameters:
+  KeyName:
+    Description: Name of an existing ec2 keypair to enable SSH 
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing ec2 keypair
+    
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-08c64544f5cfcddd0
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      Tags: 
+        - Key: Name
+          Value: WebServer
+      SecurityGroups:
+        - !Ref MySG
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            yum install httpd -y
+            systemctl start httpd
+            echo "<h1>Test Web Server</h1>" > /var/www/html/index.html
+               
+  MySG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      Tags:
+        - Key: Name
+          Value: WEB-SG
+      GroupDescription: http ,SSH setting
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          
+        
+      
+      
+      
+      
